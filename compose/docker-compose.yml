@@ -1,0 +1,71 @@
+version: "3.8"
+
+services:
+
+  configserver:
+    image: rhudraksha/configserver:latest
+    mem_limit: 700m
+    ports: 
+      - "9000:9000"
+    networks:
+      - rhudraksha-network
+       
+  account:
+    image: rhudraksha/account:latest
+    mem_limit: 700m
+    ports:
+      - "8085:8085"
+    networks:
+      - rhudraksha-network
+    depends_on:
+      - configserver
+    deploy:
+      restart_policy:
+        condition : on-failure
+        delay : 5s
+        max_attempts : 3
+        window : 120s
+    environment:
+      SPRING_PROFILES_ACTIVE: default
+      SPRING_CONFIG_IMPORT: configserver:http://localhost:9000/
+    
+  loan:
+    image: rhudraksha/loan:latest
+    mem_limit: 700m
+    ports:
+      - "8090:8090"
+    networks:
+      - rhudraksha-network
+    depends_on:
+      - configserver
+    deploy:
+      restart_policy:
+        condition : on-failure
+        delay : 5s
+        max_attempts : 3
+        window : 120s
+    environment:
+      SPRING_PROFILES_ACTIVE: default
+      SPRING_CONFIG_IMPORT: configserver:http://localhost:9000/
+      
+  card:
+    image: rhudraksha/card:latest
+    mem_limit: 700m
+    ports:
+      - "8095:8095"
+    networks:
+      - rhudraksha-network
+    depends_on:
+      - configserver
+    deploy:
+      restart_policy:
+        condition : on-failure
+        delay : 5s
+        max_attempts : 3
+        window : 120s
+    environment:
+      SPRING_PROFILES_ACTIVE: default
+      SPRING_CONFIG_IMPORT: configserver:http://localhost:9000/
+      
+networks:
+  rhudraksha-network:
